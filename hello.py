@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-import os, json
+import os
+import json
 
 env = {}
 
@@ -9,5 +10,4 @@ for env_key, env_value in os.environ.items():
 
 print("Content Type: application/json")
 print()
-
 print(json.dumps(env))
