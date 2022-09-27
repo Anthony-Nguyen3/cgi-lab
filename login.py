@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-from http import cookies
 import os
 import cgi
-from macpath import split
-from templates import login_pag, login_page
+from templates import login_page
 from templates import secret_page
+from templates import after_login_incorrect
+import secret
 
 def parse_cookies(cookie_string):
     result = {}
@@ -16,9 +16,10 @@ def parse_cookies(cookie_string):
     for cookie in cookies:
         split_cookie = cookie.split("=")
         result[split_cookie[0]] = split_cookie[1]
+    
+    return result
 
-    return
-cpploes = parse_cookies(os.environ["HTTP_COOKIE"])
+cookies = parse_cookies(os.environ["HTTP_COOKIE"])
 
 form = cgi.FieldStorage()
 
@@ -30,11 +31,22 @@ header += "Content-Type: text/html\r\n"
 
 body = ""
 
-if username is not None or ('logged' in cookies and cookies['logged'] == 'true'):
-    body += secret_page(username, password)
-    header += "Set-Cookie: logged-true; Max-Age=60\r\n"
-    header += "Set-Cookie: cookie=nom\r\n"
-    body += "<h1? A terrible secret </h1>"
+if ' username' in cookies and ' password' in cookies and ('logged' in cookies and cookies['logged'] == "true"):
+    if cookies[' username'] == secret.username and cookies[' password'] == secret.password:
+        username = cookies[' username']
+        password = cookies[' password']
+
+if (username is not None and password is not None) or ('logged' in cookies and cookies['logged'] == "true"):
+# if username is not None:
+    if username == secret.username and password == secret.password:
+        body += secret_page(username, password)
+        header += "Set-Cookie: logged=true\r\n"
+        header += "Set-Cookie: cookie=nom\r\n"
+        header += f"Set-Cookie: username={username}\r\n"
+        header += f"Set-Cookie: password={password}\r\n"
+        body += "<h1>A terrible secret</h1>"
+    else:
+        body += after_login_incorrect()
 else:
     body += login_page()
 
